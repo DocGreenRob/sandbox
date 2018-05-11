@@ -1,0 +1,5 @@
+this.GetType().Name
+this.GetType().GetProperties()
+this.GetType().GetProperty("FirstName").GetValue(this, null)
+
+https://github.com/DocGreenRob/sandbox.git
