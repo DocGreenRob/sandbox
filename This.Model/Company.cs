@@ -16,6 +16,8 @@ namespace This.Model
         {
             Name = name;
             Address = address;
+
+            FileSystem.Company = this;
         }
     }
 }

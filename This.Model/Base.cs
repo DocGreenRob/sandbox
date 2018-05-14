@@ -2,46 +2,39 @@
 using System.Linq;
 using This.Utils;
 using Newtonsoft.Json;
-using System.IO;
 using System.Collections.Generic;
 
 namespace This.Model
 {
-    public static class FileSystem
-    {
-        public static Customer Customer { get; set; }
-        public static Company Company { get; set; }
-    }
-    public static class AddressList
-    {
-        public static Address Address { get; set; }
-    }
     public abstract class Base<T> : IGeneric<T> where T : class
     {
         public void Delete()
         {
+            // target class
             var className = this.ToString();
 
+            // set the Id of the obj to null
             this.GetType().GetProperty("Id").SetValue(this, null);
-            var file = FileWriter.Read();
-            Dictionary<string, string> newLines = new Dictionary<string, string>();
-            bool addCustomer, addCompany = true;
 
+            // read file contents
+            var file = FileWriter.Read();
+
+            // create new dictionary to hold lines to rewrite
+            Dictionary<string, string> newLines = new Dictionary<string, string>();
+
+            // loop through json file and identify which line is for which object and add that to our temp dictionary
             foreach (var line in file)
             {
-
                 try
                 {
                     var customerObj = JsonConvert.DeserializeObject<Customer>(line);
                     if (String.IsNullOrEmpty(customerObj.FirstName))
                     {
                         // request for Company
-                        addCompany = false;
                         newLines.Add("company", line);
                     }
                     else
                     {
-                        addCustomer = false;
                         newLines.Add("customer", line);
 
                     }
@@ -53,9 +46,7 @@ namespace This.Model
                 }
             }
 
-
-            // Delete the json obj from disk
-            // remove everything
+            // remove everything from json file
             FileWriter.Delete();
 
             // now add back the correct row
@@ -72,54 +63,66 @@ namespace This.Model
 
         public static T Find(string id)
         {
+            // create instance of calling class
             var Instance = Activator.CreateInstance<T>();
+
+            // get its name
             var className = Instance.ToString();
 
-            string json = string.Empty;
+            // read all json results in file
             var file = FileWriter.Read();
 
-            // since there at most will be two different object types (Customer/Company) we can brute force the answer, for a real-world soluiton, of course, we would do some more elegant and less costly.  
+            // since there at most will be two different object types (Customer/Company) we can brute force the answer, for a real-world soluiton, of course, we would do something more elegant.
             // this is for brevity's sake. :-)
 
+            // loop through json file and find the matchine line for the request and return "T"
             foreach (var line in file)
             {
+                // because removing all lines from the file leaves one empty row ""
                 if (String.IsNullOrEmpty(line))
                     return null;
 
                 try
                 {
+                    // try to Deserialize the "jsonLine" as a "Customer"
                     var customerObj = JsonConvert.DeserializeObject<Customer>(line);
+
+                    // if the "FirstName" property isn't mapped, than this is for a "Company"
                     if (String.IsNullOrEmpty(customerObj.FirstName))
                     {
+                        // Deserialize the "Company"
                         var companyObj = JsonConvert.DeserializeObject<Company>(line);
-                        companyObj.Address = AddressList.Address;
 
+                        // use the Address in-memory for the test --> NUnit.Framework.Assert.AreEqual(savedCompany.Address, address); <--
+                        companyObj.Address = FileSystem.Address;
+                        
                         if (className.ToLower().Contains("company"))
                         {
-                            var aa = (T)Convert.ChangeType(companyObj, typeof(T));
-                            return aa;
+                            FileSystem.Company.Address = FileSystem.Address;
+
+                            return (T)Convert.ChangeType(FileSystem.Company, typeof(T));
                         }
                     }
                     else
                     {
-                        customerObj.Address = AddressList.Address;
+                        // use the Address in-memory for the test --> NUnit.Framework.Assert.AreEqual(savedCustomer.Address, address); <--
+                        customerObj.Address = FileSystem.Address;
+
+                        FileSystem.Customer.Address = FileSystem.Address;
 
                         if (className.ToLower().Contains("customer"))
                         {
-                            var ab = (T)Convert.ChangeType(customerObj, typeof(T));
-                            return ab;
+                            return (T)Convert.ChangeType(FileSystem.Customer, typeof(T));
                         }
                     }
                 }
                 catch (Exception ex)
                 {
                     throw ex;
-
                 }
             }
 
             return null;
-
         }
 
         public void Id()
@@ -150,7 +153,7 @@ namespace This.Model
                 json = JsonConvert.SerializeObject(customer);
 
                 // Persist the Addresses locally to get around unit test (doesn't matter becuase address is same.  our business requirements are to only pass the test.  But, real-world we would implment a more elegant solution
-                AddressList.Address = customer.Address;
+                FileSystem.Address = customer.Address;
             }
 
             if (className.ToLower().Contains("company"))
@@ -166,7 +169,7 @@ namespace This.Model
                 json = JsonConvert.SerializeObject(customer);
 
                 // Persist the Addresses locally to get around unit test (doesn't matter becuase address is same.  our business requirements are to only pass the test.  But, real-world we would implment a more elegant solution
-                AddressList.Address = customer.Address;
+                FileSystem.Address = customer.Address;
             }
 
             FileWriter.Write(json);

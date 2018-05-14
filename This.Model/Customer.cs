@@ -16,6 +16,8 @@
             FirstName = firstName;
             LastName = lastName;
             Address = address;
+
+            FileSystem.Customer = this;
         }
 
     }
