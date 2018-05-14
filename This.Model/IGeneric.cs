@@ -5,6 +5,5 @@
         void Id();
         void Save();
         void Delete();
-        T Find(string id);
     }
 }

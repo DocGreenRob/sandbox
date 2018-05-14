@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace This.Model
+﻿namespace This.Model
 {
     public partial class Customer : Base<Customer>
     {

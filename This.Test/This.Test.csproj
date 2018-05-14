@@ -15,6 +15,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\This.Model\This.Model.csproj" />
+    <ProjectReference Include="..\This.Utils\This.Utils.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Web.Extensions">
+      <HintPath>..\..\..\Users\rgreen\Downloads\System.Web.Extensions.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

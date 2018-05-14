@@ -7,6 +7,11 @@ namespace This.Model
         public string Name { get; set; }
         public Address Address { get; set; }
 
+        public Company() : this(string.Empty, new Address())
+        {
+
+        }
+
         public Company(string name, Address address)
         {
             Name = name;
